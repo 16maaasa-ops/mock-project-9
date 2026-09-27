@@ -4,18 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## このリポジトリの現状
 
-**Step 3（実装）のフェーズ 2 が途中まで完了。** Supabase（`case9`スキーマ）・管理画面ログイン・
-設定画面ができている。CSV取り込み・顧客一覧・リッチメニュー登録・LINE連携・AI要約はこれから
+**Step 3（実装）のフェーズ 2 が完了。** Supabase（`case9`スキーマ）・管理画面ログイン・
+CSV取り込み・顧客一覧・設定画面ができている。リッチメニュー登録・LINE連携・AI要約はこれから
 （実装計画の全体は README の「実装の進み具合」を参照）。
 
 実装済み（`src/lib/`）：日付計算 / セグメント判定（判定理由つき）/ CSV 検証 / 取り込み前プレビュー /
 紐付けコードの生成と入力解釈 / メニュー同期の計画（`planSync`）/ LINE 署名検証 /
 Supabase サーバークライアント（`case9`スキーマ固定）/ 管理画面ログイン（jose + bcrypt、
-IP単位の試行制限つき）/ セグメント設定の読み書きと影響プレビュー / 全顧客のセグメント一括再計算。
+IP単位の試行制限つき）/ セグメント設定の読み書きと影響プレビュー / 全顧客のセグメント一括再計算 /
+CSV取り込みのServer Action（`import_orders` RPC呼び出し＋履歴記録）/ 顧客一覧の集計・検索・絞り込み /
+紐付けコードの発行・案内文コピー / 手動セグメント指定。
 
 画面：`/admin/login`（ログイン）、`/admin`（ダッシュボード・初回チェックリスト）、
-`/admin/settings`（判定条件・LINE接続状態）が実装済み。`/admin/richmenus` `/admin/import`
-`/admin/customers` はまだ「準備中」のプレースホルダー。
+`/admin/settings`（判定条件・LINE接続状態・変更影響プレビュー）、
+`/admin/import`（CSV取り込み・取り込み前確認・履歴）、
+`/admin/customers`（一覧・検索・絞り込み・詳細パネル・コード発行・手動指定）が実装済み。
+ブラウザで実際にログイン→CSV2本（初回48件・追加5件+重複2件）を取り込み、
+README正解値（新規5/リピーター7/VIP4/休眠2、切替対象3人）と一致することを確認済み。
+`/admin/richmenus` だけがまだ「準備中」のプレースホルダー（フェーズ3で実装）。
+
+**Supabaseに動作確認用のテストデータが入っている**（`customers`18件・`orders`53件・
+`link_codes`1件・`import_jobs`2件）。ユーザーの意向で削除せず残している。
+フェーズ3以降もこのデータを使い続ける前提。本番の実データを入れる前には全件削除すること。
 
 DBマイグレーションは2本（`supabase/migrations/`）を実行済み: `0001_init_case9.sql`（スキーマ本体）、
 `0002_admin_login_attempts_fn.sql`（ログイン試行制限の関数）。
@@ -48,6 +58,15 @@ Vercel：本番デプロイ済み（Supabase・案件8共有のAI Gatewayの接�
   `.env.local` に書くときは `$` を `\$` にエスケープすること（例:
   `ADMIN_PASSWORD_HASH=\$2b\$10\$...`）。これに気づかず「値は合っているのにログインできない」
   という事象で1回ハマった
+- **`"use server"` を付けたファイルは、非同期関数以外を export できない**。定数（例:
+  `export const FOO = "bar"`）を1つ混ぜただけでビルドエラーになる。Server Action 用のファイル
+  （`src/lib/*/actions.ts`）には関数以外を置かないこと
+- **IP判定はローカル環境で `curl` とブラウザで別バケットになりうる**：開発中、`curl` 経由は
+  `x-forwarded-for` が無く `"unknown"`、Chrome経由は `"::1"`（IPv6ループバック）として記録された。
+  ログイン試行制限のテスト中に意図せずロックしたら、`admin_login_attempts` テーブルを見て
+  該当IPを確認し、`reset_admin_login_attempts` RPCで解除すること
+- **Supabaseに動作確認用のテストデータが残っている**（上の「このリポジトリの現状」参照）。
+  読み込み・書き込みのテストに使ってよいが、本番投入前は消すこと
 
 ## プロジェクト概要
 
