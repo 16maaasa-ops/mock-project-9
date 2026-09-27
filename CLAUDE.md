@@ -4,12 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## このリポジトリの現状
 
-**Step 3（実装）のフェーズ 1 まで完了。** 外部サービスに依存しない純粋なロジックとテストができていて、
-DB・LINE・管理画面・AI 要約・デプロイは未実装（実装計画の全体は README の「実装の進み具合」を参照）。
+**Step 3（実装）のフェーズ 2 が途中まで完了。** Supabase（`case9`スキーマ）・管理画面ログイン・
+設定画面ができている。CSV取り込み・顧客一覧・リッチメニュー登録・LINE連携・AI要約はこれから
+（実装計画の全体は README の「実装の進み具合」を参照）。
 
-実装済み（`src/lib/`）：日付計算 / セグメント判定 / CSV 検証 / 取り込み前プレビュー /
-紐付けコードの生成と入力解釈 / メニュー同期の計画（`planSync`）/ LINE 署名検証。
-画面は仮のトップページ（`src/app/page.tsx`）だけ。Git リポジトリではない（Vercel 連携の直前に `git init`）。
+実装済み（`src/lib/`）：日付計算 / セグメント判定（判定理由つき）/ CSV 検証 / 取り込み前プレビュー /
+紐付けコードの生成と入力解釈 / メニュー同期の計画（`planSync`）/ LINE 署名検証 /
+Supabase サーバークライアント（`case9`スキーマ固定）/ 管理画面ログイン（jose + bcrypt、
+IP単位の試行制限つき）/ セグメント設定の読み書きと影響プレビュー / 全顧客のセグメント一括再計算。
+
+画面：`/admin/login`（ログイン）、`/admin`（ダッシュボード・初回チェックリスト）、
+`/admin/settings`（判定条件・LINE接続状態）が実装済み。`/admin/richmenus` `/admin/import`
+`/admin/customers` はまだ「準備中」のプレースホルダー。
+
+DBマイグレーションは2本（`supabase/migrations/`）を実行済み: `0001_init_case9.sql`（スキーマ本体）、
+`0002_admin_login_attempts_fn.sql`（ログイン試行制限の関数）。
+
+Git リポジトリ：GitHub `https://github.com/16maaasa-ops/mock-project-9`（Public）にpush済み。
+Vercel：本番デプロイ済み（Supabase・案件8共有のAI Gatewayの接続情報を環境変数に設定済み）。
 
 コマンド（すべて `package.json` に実在）：
 
@@ -30,6 +42,12 @@ DB・LINE・管理画面・AI 要約・デプロイは未実装（実装計画�
 - 環境変数の一覧は README の「環境変数」を参照（`.env.example` は保護設定で作れなかったため README に書いている）
 - 既知の警告：`npm audit` に Vitest（テスト実行時だけ使う開発用ツール）の中程度の指摘が 1 件ある。
   修正には Vitest 5 への大きな更新が必要で、本番の動作には影響しないため見送っている
+- **`ADMIN_PASSWORD_HASH` を再発行するときの注意**：Next.js は `.env*` ファイルの中の `$変数名` を
+  「他の変数を参照する記法」として展開する仕様がある（[公式ドキュメント](https://nextjs.org/docs/app/guides/environment-variables)）。
+  bcryptのハッシュは `$2b$10$...` のように `$` を含むため、そのまま書くと展開されて値が壊れる。
+  `.env.local` に書くときは `$` を `\$` にエスケープすること（例:
+  `ADMIN_PASSWORD_HASH=\$2b\$10\$...`）。これに気づかず「値は合っているのにログインできない」
+  という事象で1回ハマった
 
 ## プロジェクト概要
 
@@ -156,3 +174,13 @@ CSV の 7 列 `order_id, order_date, customer_id, customer_email, product_name, 
 4. LINE 公式アカウントの開発者アカウント取得とプラン（上の「未検証」の項目）
 5. 想定クライアント業種（コーヒー定期便で仮置き。変更してよいか）
 6. 認証：project1 と同じ「管理画面のログイン（1 アカウント）」でよいか
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
