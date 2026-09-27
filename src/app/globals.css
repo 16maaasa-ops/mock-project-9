@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* ブランドカラー：コーヒー定期便ブランド用（エスプレッソ茶 + クリーム）。
+   セグメント色・状態色は管理画面の実装時（フェーズ 4）に、コントラストを測って追加する。 */
+@theme {
+  --color-brand-espresso: #3b2a20;
+  --color-brand-espresso-soft: #6f5b4d;
+  --color-brand-cream: #faf6f0;
+  --color-brand-border: #e6dccf;
+  --color-brand-caramel: #a35a1f;
+}
+
+:root {
+  --background: #faf6f0;
+  --foreground: #3b2a20;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-sans-jp);
+}
+
+/* 運用者が使う管理画面なので、OS のダーク設定に関わらずクリーム地で固定する */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}

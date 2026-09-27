@@ -1,0 +1,26 @@
+# 依存パッケージ（npm install で復元できるので Git 管理不要）
+node_modules/
+
+# Next.js のビルド成果物
+.next/
+out/
+
+# 環境変数（APIキー等の秘密情報）
+# .env.example だけは Git に含める（値は空でキー名だけを記載）
+.env
+.env.local
+.env.*.local
+
+# エディタ・OS
+.DS_Store
+*.log
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Claude Code の内部状態ファイル（スケジュールタスク・worktree管理等）
+.claude/

@@ -1,0 +1,8 @@
+order_id,order_date,customer_id,customer_email,product_name,quantity,amount
+O-0047,2026-09-19,C017,customer017@example.com,ドリップバッグ30個入,1,2500
+O-0048,2026-09-20,C008,customer008@example.com,ギフトセット,1,6000
+O-0049,2026-09-24,C005,customer005@example.com,定期便Sサイズ(200g×1),1,3000
+O-0050,2026-09-25,C004,customer004@example.com,ドリップバッグ30個入,1,2500
+O-0051,2026-09-26,C010,customer010@example.com,定期便Sサイズ(200g×1),1,3000
+O-0052,2026-09-29,C018,customer018@example.com,定期便Mサイズ(200g×2),1,5000
+O-0053,2026-09-30,C013,customer013@example.com,定期便Sサイズ(200g×1),1,3000
